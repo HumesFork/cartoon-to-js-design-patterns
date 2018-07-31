@@ -1,0 +1,105 @@
+#  字面量和构造函数模式
+###### 字面量
+```
+var dog={}
+dog.name="benji";   //属性
+dog.getName=function(){   //方法
+    return this.name;
+}  
+```
+###### 构造函数
+
+```
+var dog=new Object();
+dog.name="benji";   
+dog.getName=function(){   
+    return this.name;
+}  
+```
+###### 字面量和构造函数对比
+-   字面量更简洁
+-   字面量强调对象实际是一组键值对
+-   你可能创建一个本地构造函数同名为Object,所以会一直顺着原型链往上查询，直到找到local object()或global.object(),消耗性能
+
+###### 自定义构造函数
+
+```
+var Person=function(name){
+    this.name=name;
+    this.say=function(){
+        return "i am"+this.name
+    }
+}
+```
+*工作原理：*
+
+```
+var Person=function(name){
+    var this=Object.create(Person.prototype);
+    this.name=name;
+    this.say=function(){
+        return "i am"+this.name
+    }
+    return this;   //隐式返回
+}
+
+为了不在每个实例中都产生say(),优化如下:
+
+Person.prototype.say=function(){
+    return "i am"+this.name;
+}
+
+var Person=function(name){
+    this.name=name;
+    this.say=function(){
+        return "i am"+this.name
+    }
+    var that={};
+    that.name="benji";
+    return that;   //显式返回
+}
+
+let obj=new Person();
+console.log(obj.name)  //benji
+```
+
+*当忘记new调用构造函数时会发生什么？*
+
+```
+function Dog(){
+    this.name="benji"
+}
+
+var obj1=new Dog();
+console.log(obj1.name) //benji
+
+var obj2=Dog();
+console.log(obj2.name) //undefined
+console.log(window.name) //benji
+
+当忘记使用new调用构造函数时，函数中的this会指向全局对象，在浏览器中即window，这样将会引起一系列意外
+
+
+```
+*以下几种方法避免这个问题：*
+- 构造函数名字开头大写
+- 不隐式返回this,用return that替代，但这个模式问题在于，任何加在prototype上的属性或方法将遗失
+- 自调用:
+
+```
+function Dog(){
+    if(!this instanceof Dog){
+        return new Dog()
+    }
+    
+    this.name="benji"
+}
+
+Dog.prototype.getName=function(){
+    return this.name
+}
+
+let obj=Dog();
+obj.name //benji
+obj.getName() //benji
+```
