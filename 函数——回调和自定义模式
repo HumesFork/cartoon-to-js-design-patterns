@@ -1,0 +1,144 @@
+# Js设计模式——函数
+###### js函数的特性:
+- 一等公民
+- 提供作用域
+- 可以动态创建
+- 可以当作参数传递给另一个函数
+- 可以被另一个函数返回
+- 可以拥有自己的属性和方法
+
+
+```
+const a=()=>{
+    ....
+}
+const b=(c)=>{
+....
+    return d;
+}
+const c=()=>{
+    ...
+}
+const d=()=>{
+    ....
+}
+a.test=b;
+```
+
+一些术语：
+- 命名函数和匿名函数
+
+```
+let add=function add(a,b){   //命名函数
+    return a+b;
+}
+
+let add=function(a,b){       //匿名函数
+    return a+b;
+}
+```
+- 函数表达式和函数声明的区别
+  
+```
+callMe(function(){
+    ....               //此为函数表达式,可作为回调
+})
+
+let obj={
+    say:function(){
+        .....          //函数表达式，可作为方法
+    }
+}
+
+function test(){
+    fucntion bar(){}    //函数声明
+}
+
+function boo(){}        //可能为函数声明或者匿名函数表达式
+
+function foo(){
+    console.log('global foo)
+};
+function bar(){
+    console.log('global bar')
+};
+
+function hoist(){
+    console.log(typeof foo) //function
+    console.log(typeof bar) //undefined
+    
+    foo(); 'local foo'
+    bar() //error
+    
+    function foo(){
+        console.log('local foo')
+    }
+    
+    let bar=function(){
+        console.log('local bar')
+    }
+}
+
+//可以看到，函数声明方式其声明和函数定义全部提升。函数表达式只会提升变量，并不会提升函数本身
+```
+
+###### 回调模式
+
+```
+fcuntion bar(callback){
+    ....
+    callback();
+}
+
+function foo(){
+    console.log('foo');
+}
+
+bar(foo);     //'foo'
+
+//其中foo作为参数传递到bar中,foo被称为回调函数,bar在需要时随时可以调用foo,即call it back。
+//回调模式可以将一个大的逻辑复杂的函数分解为许多完成单一功能的子函数。
+```
+
+###### 自定义模式
+
+```
+function bar(){
+    console.log('bar');
+    bar=function(){
+        console.log('foo');
+    } 
+}
+
+bar() //bar
+bar() //foo
+
+//这个模式在你需要做一些初始化的工作且只需要做一次的时候很有用，缺点是任何加在函数对象上的属性在重新定义后将会缺失。
+
+//注意,以下方式重定义无效
+
+function bar(){
+    console.log('bar');
+    bar=function(){
+        console.log('foo');
+    } 
+}
+
+let baz=bar;
+bar() //bar
+baz() //bar
+bar() //foo
+baz() //bar
+
+//为什么会这样,让我们看以下这个例子
+let a=[1,2,3];
+let b=a;
+a=[4,5,6];
+console.log(b) //[1,2,3]
+
+let a=[1,2,3];
+let b=a;
+a.pop();
+console.log(b) //[1,2]
+
+```
