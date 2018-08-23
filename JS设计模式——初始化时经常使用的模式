@@ -1,0 +1,80 @@
+# JS设计模式——初始化时经常使用的模式
+
+###### immediate模式
+
+```
+(function (){
+    console.log('foo')
+}());
+
+//实质上这是一个函数表达式,在其被创建后立马执行.
+//可以将这种模式想象为一次性方便筷，用完即丢.
+```
+
+
+###### immediate Object Initialization模式  --对象即刻初始化模式
+
+```
+({
+    width:400,
+    height:600,
+    getArea:function(){
+        return this.width*this.height
+    },
+    init:function(){
+        console.log(this.getArea());
+        //.....更多的初始化工作
+    }
+}
+).init()
+```
+
+######  使用情景:
+- 这个模式在你需要做一些初始化工作时很有用.初始化由于只需要一次,没必要用一个可以复用的命名函数,将其暴露给全局变量global.
+- 当你需要为页面渐进式增强时,使用此模式可以保证这个功能和页面其他代码无任何耦合,也不会和其他功能产生命名冲突.
+- 重点在于这两种模式都可以避免全局变量被污染.
+- 第二种模式比第一种具有更高的可配置性，更灵活.
+
+###### Init-Time Branching模式 --初始化分支模式
+
+```
+let utils={
+    addListener:function(el,type,fn){
+        if(typeof window.addEventListener==='function'){
+            el.addEventListener(type,fn,false)
+        }lese if(typeof document.attachEvent==='function'){
+            el.attachEvent('on'+type,fn)
+        }
+    }
+}
+
+//这是一个简单的例子,检测浏览器支持的事件绑定函数.其中一个问题是每次调用addListener函数时都要判断一遍,但在这次生命周期内,浏览器不会突然改变,因此我们需要优化.
+
+let utils={
+    addListener:null
+}
+
+if(typeof window.addEventListener==='function'){
+            utils.addListener=function(el,type,fn){
+                el.addEventListener(type,fn,false)
+            }
+        }lese if(typeof document.attachEvent==='function'){
+            utils.addListener=function(el,type,fn){
+                el.attachEvent('on'+type,fn)
+            }
+           
+}
+
+
+```
+
+###### 持久化模式
+
+```
+function foo(a,b){}
+console.log(foo.length) //2,此处返回函数形参个数
+
+//函数在js里也是一种对象,因此可以添加自己的属性.
+foo.num=10;
+//在做完初始化工作时，如果其中含有大量运算，将运算结果保存在函数属性中，可以即取即用.
+```
