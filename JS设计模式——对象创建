@@ -1,0 +1,87 @@
+###### 命名空间模式
+你可以创建一个全局对象,然后将方法都加入到这个对象里.
+
+```
+let MYAPP=MYAPP||{}
+
+MYAPP.Parent=function(){};
+
+MYAPP.Child=function(){};
+
+MYAPP.data=[1,2,3,4,5];
+
+  缺点:
+  
+- 增加了书写量
+- 只有一个全局对象表明任何一处被修改可能影响其余所有功能
+- 过多嵌套会导致性能问题
+
+此外,在开发时尤其是多人开发,很容易重名,因此我们需要一个检测机制在重复命名时将不会创建以免被覆盖
+
+MYAPP.namespace=function(ns_string){
+    let parts=ns_string.split('.'),
+        parent=MYAPP,
+        i;
+    
+    if(parts[0]=='MYAPP'){     //去掉多余的前缀
+        parts=parts.slice(1);
+    }    
+    
+    for(let i=0;i<parts.length;i++){
+        if(!parent[parts[i]]){    //如果这个不存在
+            parent[parts[i]]={}
+        }       
+        parent= parent[parts[i]];
+    }
+    
+    return parent;
+}
+
+MYAPP.namespace('once.upon.a.time.there.was.this.long.nested.property');
+```
+###### 声明依赖模式
+许多js库都是模块化的,在你的代码顶层声明需要的模块并将它们赋值给本地变量是一个好主意.
+
+这是一个十分简单的模式,但它有许多优点:
+
+- 显示指定依赖告诉其他使用者这个页面的依赖信息
+- 使用本地变量通常比使用全局变量快,更加快于对于有很多嵌套的对象关系
+- 有利于代码压缩器压缩代码
+
+###### 私有模式
+JS没有专门的方法创建对象的私有属性和方法,所有方法都是公共的,这点和JAVA不同.
+但是你可以使用闭包创建自己的私有属性和方法.
+
+```
+function Gadget(){
+    let name='ipad';
+    this.getName=function(){
+        return name;
+    }
+}
+
+let foo=new Gadget();
+foo.name        //undefined
+foo.getName()   //ipad
+
+其中foo.getName又叫特权方法,之所以叫"特权",是因为它可以获取私有属性看起来有更多"权力".
+
+但这种模式有一个问题,如果碰巧私有属性是一个对象或数组,那么外部是可以改变这个属性的.
+
+function Gadget(){
+    let person={
+        bob:32,
+        anna:20
+    };
+    this.getPerson=function(){
+        return person;
+    }
+}
+
+let foo=new Gadget();
+let test=foo.getPerson();
+test.alisa=10;
+foo.getPerson()    //{bob:32,anna:20,alisa:10}
+    
+ 一个比较简单通用的方法就是返回这个数据的副本,而不是这个数据本身.                       
+```
