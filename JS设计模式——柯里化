@@ -1,0 +1,93 @@
+###### 函数应用和函数调用区别
+
+```
+//在了解柯里化前,先来看看什么是函数应用和函数调用
+let sayHi=funtion(who){
+    return 'hello'+(who?','+who:'')
+}
+
+//调用一个函数
+sayHi() //hello
+sayHi('world') //hello world
+
+//应用一个函数
+sayHi.apply(null,['world']) //hello world
+
+//其中null这个参数就是要应用该函数的对象,如果值为null,表示应用这个函数对象为global即全局对象
+
+let alien={
+        sayHi=funtion(who){
+        return 'hello'+(who?','+who:'')
+    }
+}
+
+alien.sayHi('world'); //函数调用
+sayHi.apply(alien,['world']) //函数应用
+sayHi.call(alien,'world') //函数应用
+
+
+
+从上面的例子可以看出来,函数调用其实是函数应用的语法糖.其中call是apply的语法糖,当只有一个参数时,可以使用call,这样更有效率.
+```
+###### 部分函数
+
+```
+function add(x,y){
+    return x+y;
+}
+
+注:以下仅供演示作用,并不是真实js代码
+
+当我们调用add(4,5)时,实际类似于以下两步:
+第一步:
+    function add(4,y){
+        return 4+y;
+    }
+第二步:
+    function add(4,5){
+         return 4+5;
+    }
+    
+我们将add函数拆分成了两步运算,实际上这和我们手动计算4+5时大脑的运作是类似的,可以将add(4,5)看作是add(4)(5)的语法糖.
+
+```
+
+###### 柯里化
+
+定义:柯里化实际是一种函数变形的过程,我们将一个函数不断拆分成更小的部分函数的过程.
+
+现在我们实际操作一下,将上面的add函数柯里化.
+
+```
+//柯里化后的add
+
+funtion add(x,y){
+    if(y==undefined){         //如果只传了一部分参数
+        return function(y){   
+            return x+y;
+        }
+    }
+    return x+y;             //如果传了完整参数
+}
+
+add(3)(4)  //7
+
+下面我们来写一个通用的柯里化其他函数的函数:
+function curring(fn){
+		let slice=Array.prototype.slice,
+			old_args=slice.call(arguments,1);              //保留除传进来的fn外的所有参数
+		
+		return function(){
+			let new_args=slice.call(arguments),			   //将参数转化为数组
+				args=old_args.concat(new_args);
+			
+			return fn.apply(null,args);    
+		}    
+		
+	}
+
+	let newAdd=curring(add,5)                             //该处的add为最开始定义的add
+	newAdd(1)  //6
+
+
+```
