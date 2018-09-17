@@ -1,0 +1,67 @@
+###### 在JS中模拟类
+
+```
+function Parent(name){
+    this.name=name||'Adam';
+}
+
+Parent.prototype.say=function(){
+    return this.name
+}
+
+function Child(name){}
+
+inherit(Child,Parent)           //Child从Parent中继承
+
+继承模式1:
+
+function inherit(c,p){
+    c.prototype=new p()         //将child的原型指向parent的实例
+}
+
+let kid=new Child();
+kid.say()                       //Adam
+
+使用这种模式既继承了原型上的属性,同时也继承了实例的自有属性,且无法设置自己的属性.
+
+继承模式2:借用构造器
+
+function Child(a,b,c,d){
+    Parent.apply(this,arguments)
+}
+
+这种方式相当于替换了Parent中的this,并且传递Child的参数进去.此种模式只继承了Parent内部的属性,无法继承Parent.prototype上的属性,Child.prototype依然指向自己.
+
+这种模式优点在于复制了父类的属性,不会改写父类属性,安全性提高.缺点是无法继承父类原型上的属性.
+
+继承模式3:融合模式
+此种模式很简单,将以上两种模式融合起来.首先借用父类的构造器,然后将自己的原型指向父类的实例.
+
+function Child(){
+    Parent.apply(this,arguments)
+}
+
+Child.prototype=new Parent();
+
+该模式缺点是,构造函数Parent被调用两次,并且自有属性例如name也被继承了两次,因此降低了效率.
+
+模式4:共享模式
+function inherit(C,P){
+    C.prototype=P.prototype;
+}
+
+和上面一种模式调用两次构造函数不同,该模式一次父级构造函数都不需要调用.由于所有共享成员都应该进入原型对象,所以此种模式清晰明了.
+
+缺点在于任何一个子类改变自己的原型,父类原型也会被改变,同时影响所有其他子类.
+
+模式5:临时构造模式
+function inherit(C,P){
+    let F=function(){}
+    F.prototype=P.prototype;
+    C.prototype=new F()
+}
+
+和上一种模式一样,子类也只继承父类原型上的属性和方法.区别是,子类和父类原型并没有直接联系,这样即使改变子类原型属性也不会影响父类原型对象.
+
+```
+以上几种模式就是最经典的模拟类继承的模式.
