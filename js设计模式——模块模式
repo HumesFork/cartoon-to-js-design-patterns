@@ -1,0 +1,86 @@
+###### 模块模式
+模块模式在开发中广泛使用,有助于代码解耦,该模式主要混合了以下几种特性:
+- 命名空间
+- 自执行函数
+- 私有方法
+- 依赖声明
+
+
+
+```
+1.首先创造一个命名空间:
+let MAYAPP={};
+
+2.第二步定义这个模块:
+MYAPP.entity=(function(){
+    let secondEntity=MYAPP.secondEntity,    //依赖声明 
+        thirdEntity=MYAPP.thirdEntity;      
+    
+   //定义一些私有方法
+   ....
+   
+   return {                         //返回公共接口
+       eat:function(){
+            ...调用私有方法...
+            ...自己的逻辑...
+       },
+       
+       sleep:function(){
+           ...
+       }
+   } 
+}())
+
+3.以上4种特性混合便形成了模块模式.
+
+4.以上的模块模式问题在于返回的方法可以被外界改写,并且在模块内部不能复用.因此我们还需要做些优化,将其封装之后再返回,如下所示:
+MYAPP.entity=(function(){
+    let secondEntity=MYAPP.secondEntity,    //依赖声明 
+        thirdEntity=MYAPP.thirdEntity,      
+    
+    //定义一些私有方法
+     eat=function(){
+            ...调用私有方法...
+            ...自己的逻辑...
+      },
+       
+     sleep=function(){
+           ...
+      };
+   return {                         
+      eat:eat,
+      sleep:sleep
+   } 
+}())
+
+这样改进后,即使将MYAPP.entity.eat改写,模块内部其他部分调用eat时并不会受影响,而第一种方式会影响整个模块eat的调用.
+
+另外一种常用的方式是返回构造函数创造模块对象,而不是直接返回对象字面量.如下所示:
+MYAPP.entity=(function(){
+    let secondEntity=MYAPP.secondEntity,    //依赖声明 
+        thirdEntity=MYAPP.thirdEntity,      
+    
+    //定义一些私有方法
+    conStr=function(num){
+        this.rice=num;
+        this.bed=num;
+    };
+    
+    conStr.prototype={
+        Constructor:MYAPP.entity,
+        eat:function(){},
+        sleep:function(){}
+    }
+    
+    return conStr;
+    
+}())
+
+let obj=new MYAPP.entity(num);   //这样该模块可配置性增强了
+```
+
+
+
+
+
+
